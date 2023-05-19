@@ -1,0 +1,83 @@
+import puppeteer from "puppeteer";
+import express, { Request, Response } from "express";
+import http from "http";
+import { Server } from "socket.io";
+
+import axios from 'axios';
+
+const app = express();
+const server = http.createServer(app);
+const targetURL = "https://coldplayinjakarta.com/";
+const io = new Server(server);
+
+app.use(express.json());
+app.use(express.static("public"));
+
+async function run(capture?: boolean): Promise<object> {
+  const browser = await puppeteer.launch({ headless: "new" });
+  const page = await browser.newPage();
+  const res = await page.goto(targetURL, { waitUntil: "domcontentloaded" });
+  if (capture) {
+    await page.screenshot({
+      path: `./capture/${new Date().valueOf()}screenshot.png`,
+    });
+  }
+  const btnList = await page.$$eval("button.lp-button", (el) => {
+    return el.map((v) => ({ [v.textContent as string]: v.classList }));
+  });
+  browser.close();
+  return btnList;
+}
+
+async function detect() {
+  const btnStatus = JSON.parse(JSON.stringify(await run()));
+  const btnPublic = btnStatus[1]["BUY PUBLIC ON-SALE TICKETS"];
+  // Object.values(btnPublic).forEach((val) => {
+
+  // });
+
+  return [
+    Object.values(btnPublic).includes("disabled"),
+    JSON.stringify(btnPublic),
+  ];
+}
+
+// io.on("connection", (socket) => {
+//   setInterval(() => {
+//     socket.emit(
+//       "updateDate",
+//       new Date().toLocaleTimeString("en-US", { timeZone: "Asia/Jakarta" })
+//     );
+//   }, 500);
+
+//   setInterval(async () => {
+//     let status = '<p class="font-mono">Disabled</p>';
+//     const [disabled, jsdata] = await detect();
+//     socket.emit("updateBtnStatus", `[${new Date().toLocaleTimeString()}]`);
+//   }, 1000);
+// });
+
+// app.get("/", async (req, res) => {
+//   console.log(await detect());
+//   res.render("index.html");
+// });
+
+// server.listen(3002, () => {
+//   console.log("Server Listen on http://localhost:3002");
+// });
+
+
+async function test(){
+  const x = await axios.get('https://coldplayinjakarta.com/');
+  console.log(x.data)
+}
+
+test();
+
+
+// setInterval(async() => {
+//   console.log(await detect());
+// },500);
+
+
+

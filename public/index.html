@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CP Tracker</title>
+    <link href="./output.css" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+<body>
+    <div class="flex flex-col gap-4 h-screen">
+        <div class="w-full border-b py-10 items-center justify-center">
+            <h1 id="time" class='font-bold text-4xl text-center'></h1>
+        </div>
+    
+        <div class="bg-teal-500 w-full h-1/2 overflow-y-scroll flex flex-col gap-1" id="info">
+    
+        </div>
+    </div>
+</body>
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+    var socket = io();
+
+    socket.on('updateDate',msg => {
+        document.getElementById('time').innerHTML = msg;
+        // document.getElementById('info').insertAdjacentHTML("beforeend","<span>AAAAAAAAAAAAAA</span>")
+    });
+
+
+    socket.on('updateBtnStatus', msg => {
+        var line = document.createElement('div');
+        line.innerText = msg;
+        // document.getElementById('info').insertAdjacentHTML('beforeend', `<span>${msg}</span>`);
+        document.getElementById('info').appendChild(line);
+        document.getElementById('info').scrollTop = document.getElementById('info').scrollHeight;
+
+
+    })
+
+</script>
+
+</html>
